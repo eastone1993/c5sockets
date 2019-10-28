@@ -1,0 +1,56 @@
+<table id="board">
+	<% for(var i = 0; i < boardArray.length; i++) {%>
+		<tr>
+			<% for(var j = 0; j < boardArray[i].length; j++){%>
+				<td class="block" onclick="clickBlock(event)" id="<%= JSON.stringify(i) + JSON.stringify(j) %>"><%= boardArray[i][j] %></td>
+			<%}%>
+		</tr>
+	<%}%>
+</table>	
+<p id="turnCounter">Player Turn: <%= turn%></p>
+<button onclick="reset(event)">RESET</button>
+
+<script>
+	var socket = io(); 
+	function clickBlock(event) {
+		var x = event.clientX, y = event.clientY;
+		elementMouseIsOver = document.elementFromPoint(x, y);
+		turnCounter = document.getElementById("turnCounter");
+		console.log(elementMouseIsOver.id);
+		socket.emit('move', elementMouseIsOver.id); 
+	}
+
+	socket.on('move', function(res) {
+		console.log(res);
+		document.getElementById(res.lastMove).innerHTML = res.lastTurn; 
+		document.getElementById('turnCounter').innerHTML = 'Player Turn: ' + res.gameObj.turn; 
+	});
+
+	socket.on('draw', function(res) {
+		console.log('draw');
+		console.log(res);
+		document.getElementById(res.lastMove).innerHTML = res.gameObj.turn;
+		setTimeout(function() {
+			alert(`Game is a Draw!`)
+		, 10});
+		reset(event); 
+	});
+
+	socket.on('win', function(res) {
+		//;console.log('win');
+		console.log(res);
+		document.getElementById(res.lastMove).innerHTML = res.gameObj.turn; 
+		setTimeout(function() {
+			alert(`Player ${res.gameObj.turn} wins!`)
+		, 10});
+		reset(event); 
+	});
+	
+	function reset(event) {
+		axios.post('/reset')
+		.then(function(res) {
+			location.reload(); 
+			console.log(res); 
+		});
+	}
+</script>
