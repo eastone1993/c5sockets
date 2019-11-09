@@ -1,0 +1,18 @@
+<table id="roomList">
+	<th>List of Rooms</th>
+	<% var roomList = Object.entries(roomObj);%>
+	<% for(var i = 0; i < roomList.length; i++) {%>
+		<tr><td><a href="/room?location=<%- roomList[i][0]%>"><%- roomList[i][0]%></a></td></tr>
+		<!-- <tr><td><a href="#" onclick="fetchRoom(event)"><%- roomList[i][0]%></a></td></tr> -->
+	<%}%>
+</table>	
+
+<script>
+	function fetchRoom(event) {
+		console.log(event.target.innerHTML); 
+		axios.get(`/checkRoom?room=${event.target.innerHTML}`)
+		.then(function(res) {
+			console.log(res);
+		});
+	}
+</script>

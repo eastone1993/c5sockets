@@ -1,3 +1,5 @@
+<h1 id="roomTitle">Room: <%- roomLocation%></h1>
+<h2 id="playerPiece"></h2>
 <table id="board">
 	<% for(var i = 0; i < boardArray.length; i++) {%>
 		<tr>
@@ -11,7 +13,12 @@
 <button onclick="reset(event)">RESET</button>
 
 <script>
+	
 	var socket = io(); 
+	
+	var roomLocation = document.getElementById('roomTitle').innerHTML.split(' '); 
+	socket.emit('join', {location: roomLocation[1]});
+
 	function clickBlock(event) {
 		var x = event.clientX, y = event.clientY;
 		elementMouseIsOver = document.elementFromPoint(x, y);
@@ -19,6 +26,11 @@
 		console.log(elementMouseIsOver.id);
 		socket.emit('move', elementMouseIsOver.id); 
 	}
+
+	socket.on('join', function(res) {
+		//console.log(res.gameObj.players[res.id]);
+		document.getElementById('playerPiece').innerHTML = 'You are ' + res.gameObj.players[res.id] + "'s";
+	});
 
 	socket.on('move', function(res) {
 		console.log(res);
@@ -32,7 +44,7 @@
 		document.getElementById(res.lastMove).innerHTML = res.gameObj.turn;
 		setTimeout(function() {
 			alert(`Game is a Draw!`)
-		, 10});
+		},10);
 		reset(event); 
 	});
 
@@ -42,15 +54,21 @@
 		document.getElementById(res.lastMove).innerHTML = res.gameObj.turn; 
 		setTimeout(function() {
 			alert(`Player ${res.gameObj.turn} wins!`)
-		, 10});
+		},10);
 		reset(event); 
 	});
 	
+	
+	
 	function reset(event) {
-		axios.post('/reset')
+		socket.emit('test'); 
+		
+		/*
+		axios.post('/reset', {location: roomLocation[1]})
 		.then(function(res) {
 			location.reload(); 
 			console.log(res); 
 		});
+		*/
 	}
 </script>

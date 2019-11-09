@@ -51,88 +51,144 @@ http.listen(port, function() {
 //////API//////////////
 const setup = require('./public/js/setup.js');
 const logic = require('./public/js/logic.js'); 
-var gameObj = {
+var roomObj = {
+    '1001': '',
+    '1002': '',
+    '1003': ''
+}
 
-    turn: 'X', 
-    boardArray: setup.generateBoard(), 
-    gameStatus: 'new', 
-    players: {
-        X: {
-            username: '',
-            id: '',
-            type: 'X'
-        },
-        O: {
-            username: '',
-            id: '',
-            type: 'O'
-        }
-    }
-};  
+//populates rooms with information
+setup.buildRooms(roomObj); 
 
 /* GET home page. */
+
 app.get('/', function(req, res) {
-    if(gameObj.players.X.id == '' || gameObj.players.O.id == '') {
-        res.render('index', { title: 'Connect 5', boardArray: gameObj.boardArray, turn: gameObj.turn});
-        console.log(gameObj);
-    }
-    else {
-        console.log('room full')
-        res.send('<p>ROOMFULL</p>');
-    }
+    res.render('index', {
+        title: 'Connect 5', 
+        roomObj: roomObj
+    });
 });
 
-io.on('connection', function(socket) {
-    console.log('a user connected: ' + socket.id);
+app.get('/checkRoom', function(req, res) {
+    console.log(`Room Checked: ${req.query.room}`);
+    res.send(roomObj);
+});
 
-    if (gameObj.players.X.id == '') {
-        gameObj.players.X.id = socket.id;
-        gameObj.players[socket.id] = 'X'; 
-    }
-    else if(gameObj.players.O.id == '') {
-        gameObj.players.O.id = socket.id;
-        gameObj.players[socket.id] = 'O'; 
-    }
+app.get('/room', function(req, res) {
+    console.log(`Query: ${req.query.location}`);
+    var location = req.query.location;
+    if(roomObj[location].players.X.id == '' || roomObj[location].players.O.id == '') {
+        res.render('room', { 
+            title: 'Connect 5', 
+            roomObj: roomObj,
+            roomLocation: location,
+            boardArray: roomObj[location].boardArray, 
+            turn: roomObj[location].turn
+        });
+        console.log(roomObj[location]);
+    }  
     else {
-        console.log('This is weird!');
-    }
-    console.log(gameObj);
+        console.log('room full')
+        console.log(roomObj);
+        res.send('<p>ROOMFULL</p>');
+    }   
+});
+/*
 
-    socket.on('disconnect', function() {
-        console.log('user disconnected: ' + socket.id);
-        gameObj.players[gameObj.players[socket.id]].id = ''; 
-        delete gameObj.players[socket.id];
-        console.log(gameObj);
-    });
-    socket.on('move', function(move) {
-        console.log(move);
-        if (gameObj.boardArray[move[0]][move[1]] == '' && socket.id == gameObj.players[gameObj.turn].id) {
-            gameObj.boardArray[move[0]][move[1]] = gameObj.turn;
-            gameObj.gameStatus = logic.checkForWin(gameObj.boardArray, parseInt(move[0], 10), parseInt(move[1], 10));
-            if (gameObj.gameStatus == 'win') {
-                console.log('win');
-                io.emit('win', {gameObj: gameObj, lastMove: move});
+app.post('/reset', function(req, res) {
+    console.log('resetting game');
+    roomObj[req.body.location].turn = 'X'; 
+    roomObj[req.body.location].boardArray = setup.generateBoard(); 
+    roomObj[req.body.location].gameStatus = 'new';
+    res.send('game reset');  
+});
+*/
+
+io.on('connection', function(socket) { //code for the socket io connection 
+
+    //code that runs on initial connection
+    console.log('a user connected: ' + socket.id);
+    socket.on('join', function(res) {
+        var location = res.location; 
+        socket.join(location, function() {
+            if (roomObj[location].players.X.id == '') {
+                roomObj[location].players.X.id = socket.id;
+                roomObj[location].players[socket.id] = 'X'; 
+
             }
-            else if (gameObj.gameStatus == 'draw') {
-                console.log('draw');
-                io.emit('draw', {gameObj: gameObj, lastMove: move}); 
+            else if(roomObj[location].players.O.id == '') {
+                roomObj[location].players.O.id = socket.id;
+                roomObj[location].players[socket.id] = 'O'; 
             }
             else {
-                var lastTurn = gameObj.turn
-                logic.changeTurn(gameObj);
-                io.emit('move', {gameObj: gameObj, lastMove: move, lastTurn: lastTurn})
+                console.log('This is weird!');
+            }
+            //console.log(roomObj);
+            io.to(socket.id).emit('join', { 
+                gameObj: roomObj[location],
+                id: socket.id
+            });            
+        });
+    });  
+    //end code that runs on connection
+
+    socket.on('disconnecting', function() { //whenever a player disconnects
+        
+        var location = Object.keys(io.sockets.adapter.sids[socket.id])[0];
+        
+        socket.on('disconnect', function() {
+            //console.log('This shit works!');
+            //console.log(roomObj[location]);
+            console.log('user disconnected: ' + socket.id);
+            roomObj[location].players[roomObj[location].players[socket.id]].id = ''; 
+            delete roomObj[location].players[socket.id];
+        });
+        //console.log(roomObj[location]);
+    });
+
+    socket.on('move', function(move) { //whenever a player makes a move
+        var location = Object.keys(io.sockets.adapter.sids[socket.id])[0];
+        console.log(location);
+        console.log(move);
+        console.log(roomObj);
+        if (roomObj[location].boardArray[move[0]][move[1]] == '' && socket.id == roomObj[location].players[roomObj[location].turn].id) {
+            roomObj[location].boardArray[move[0]][move[1]] = roomObj[location].turn;
+            roomObj[location].gameStatus = logic.checkForWin(roomObj[location].boardArray, parseInt(move[0], 10), parseInt(move[1], 10));
+            if (roomObj[location].gameStatus == 'win') {
+                console.log('win');
+                io.to(location).emit('win', {
+                    gameObj: roomObj[location], 
+                    lastMove: move
+                });
+
+            }
+            else if (roomObj[location].gameStatus == 'draw') {
+                console.log('draw');
+                io.to(location).emit('draw', {
+                    gameObj: roomObj[location], 
+                    lastMove: move
+                }); 
+            }
+            else {
+                var lastTurn = roomObj[location].turn
+                logic.changeTurn(roomObj[location]);
+                io.to(location).emit('move', {
+                    gameObj: roomObj[location], 
+                    lastMove: move, 
+                    lastTurn: lastTurn
+                });
             }
         }
         else {
             console.log('invalid move');
         }
     });
+
+    socket.on('test', function(res) {
+        //socket.join('1002');
+        var location = Object.keys(io.sockets.adapter.sids[socket.id])[0];
+        setup.resetRoom(roomObj[location]);
+        io.to(location).emit('reset');
+    });
 });
 
-app.post('/reset', function(req, res) {
-    console.log('resetting game');
-    gameObj.turn = 'X'; 
-    gameObj.boardArray = setup.generateBoard(); 
-    gameObj.gameStatus = 'new';
-    res.send('game reset');  
-});
