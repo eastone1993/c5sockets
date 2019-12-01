@@ -1,18 +1,29 @@
-<table id="roomList">
+
+<table id="roomList" class="roomlist">
 	<th>List of Rooms</th>
 	<% var roomList = Object.entries(roomObj);%>
 	<% for(var i = 0; i < roomList.length; i++) {%>
-		<tr><td><a href="/room?location=<%- roomList[i][0]%>"><%- roomList[i][0]%></a></td></tr>
-		<!-- <tr><td><a href="#" onclick="fetchRoom(event)"><%- roomList[i][0]%></a></td></tr> -->
+		<tr><td><a href="/room?location=<%- roomList[i][0]%>" onclick="fetchRoom(event)"><%- roomList[i][0]%></a></td></tr>
 	<%}%>
 </table>	
 
+
 <script>
 	function fetchRoom(event) {
+		event.preventDefault(); 
 		console.log(event.target.innerHTML); 
-		axios.get(`/checkRoom?room=${event.target.innerHTML}`)
-		.then(function(res) {
-			console.log(res);
-		});
+		if (document.cookie === 'username=' || document.cookie === '') {
+			alert(`username required!`)
+		} else {
+			axios.get(`/fetchRoom?room=${event.target.innerHTML}`)
+			.then(function(res) {
+				console.log(res.data);
+				if (res.data.players.number < 2) {
+					window.location = event.target.href;
+				} else {
+					alert(`Room is full!`)
+				}
+			});		
+		}
 	}
 </script>

@@ -45,15 +45,30 @@ module.exports = { //
 		//reset board array
 		gameObj.boardArray = module.exports.generateBoard(); 
 		
-		//switch player pieces
-		var tmpX = gameObj.players[gameObj.players.X.id]; 
-		var tmpO = gameObj.players[gameObj.players.O.id];
-		gameObj.players[gameObj.players.X.id] = tmpO; 
-		gameObj.players[gameObj.players.O.id] = tmpX; 
-		
+		console.log(gameObj); 
+
+		//switch player pieces if both players are in game
+		if (gameObj.players[gameObj.players.X.id] != '' && gameObj.players.O.id != ''){
+			var tmpX = gameObj.players[gameObj.players.X.id]; 
+			var tmpO = gameObj.players[gameObj.players.O.id];
+			gameObj.players[gameObj.players.X.id] = tmpO; 
+			gameObj.players[gameObj.players.O.id] = tmpX; 
+			
+			tmpX = gameObj.players.X.username; 
+			tmpO = gameObj.players.O.username; 
+			gameObj.players.X.username = tmpO; 
+			gameObj.players.O.username = tmpX; 			
+
+			tmpX = gameObj.players.X.id; 
+			tmpO = gameObj.players.O.id; 
+			gameObj.players.X.id = tmpO; 
+			gameObj.players.O.id = tmpX;
+		}
+
+
 		//reset game status - currently not an implemented value
 		gameObj.gameStatus = 'new';
-		
+		//console.log(gameObj); 
 		return gameObj; 
 	}
 }

@@ -1,0 +1,80 @@
+<!-- Button trigger modal -->
+<!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+  Launch demo modal
+</button> -->
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <!-- <div class="modal-header">
+        <h5 class="modal-title" id="myModalLabel"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div> -->
+      <div class="modal-body">
+        Username: <input id= "usernameField" type="text">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="saveUser()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>   
+  $(document).ready(function() {
+    if (document.cookie === `username=` || document.cookie === ``) {
+      $("#myModal").modal({
+        backdrop: 'static',
+        keyboard: false,
+        show: true
+      });      
+    }
+  });
+
+  function saveUser() {
+    var username = $("#usernameField").val()
+    if (username === '') {
+      console.log('ENTER A REAL USERNAME'); 
+    } else {
+      //console.log(username);
+
+      //document.cookie = `username=${username}`
+      axios.post('/user', {
+        username: username
+      })
+      .then(function(res) {
+        console.log(res);
+        if (res.data == "taken") {
+          alert('Username is taken!')
+        } else {
+          $("#myModal").modal('hide');
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });            
+    }
+  }
+
+  document.onkeypress = function(evt) {
+    evt = evt || window.event;
+    var charCode = evt.keyCode || evt.which;
+    var charStr = String.fromCharCode(charCode);
+    if (charStr === 'a') {
+      document.cookie = "username= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
+    } else if (charStr === 'b') {
+      alert(document.cookie);
+    } else if(charStr === 'c') {
+      //alert(charStr);
+      axios.get('/checkuser')
+      .then(function(res) {
+        console.log(res)
+      });
+    } 
+  };
+
+</script>
+

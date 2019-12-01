@@ -3,11 +3,9 @@ module.exports = {
 	changeTurn: function(turnObj) {
 		if (turnObj.turn == 'X') {
 			return turnObj.turn = 'O'; 
-		}
-		else if (turnObj.turn == 'O') {
+		} else if (turnObj.turn == 'O') {
 			return turnObj.turn = 'X'; 
-		}
-		else {
+		} else {
 			throw("Error: Turn Undefined"); 
 		}
 	},
@@ -15,8 +13,7 @@ module.exports = {
 	checkForWin: function(boardArray, i, j) {		 
 		if (module.exports.lateralCheck(boardArray, i, j) == true || module.exports.verticalCheck(boardArray, i, j) == true || module.exports.uLLRCheck(boardArray, i, j) == true || module.exports.lLURCheck(boardArray, i, j) == true) {
 			return 'win';
-		}
-		else {
+		} else {
 			return module.exports.drawCheck(boardArray);	
 		}
 	},
@@ -31,8 +28,7 @@ module.exports = {
 				if (winCount == 5) {
 					return true; 
 				}
-			}
-			else {
+			} else {
 				break
 			}
 		}
@@ -46,8 +42,7 @@ module.exports = {
 				if (winCount == 5) {
 					return true; 
 				}			
-			}
-			else {
+			} else {
 				break
 			}
 		}	
@@ -64,8 +59,7 @@ module.exports = {
 				if (winCount == 5) {
 					return true; 
 				}
-			}
-			else {
+			} else {
 				break
 			}
 		}
@@ -79,8 +73,7 @@ module.exports = {
 				if (winCount == 5) {
 					return true; 
 				}			
-			}
-			else {
+			} else {
 				break
 			}
 		}	
@@ -97,8 +90,7 @@ module.exports = {
 				if (winCount == 5) {
 					return true; 
 				}
-			}
-			else {
+			} else {
 				break
 			}
 		}
@@ -112,8 +104,7 @@ module.exports = {
 				if (winCount == 5) {
 					return true; 
 				}			
-			}
-			else {
+			} else {
 				break
 			}
 		}	
@@ -130,8 +121,7 @@ module.exports = {
 				if (winCount == 5) {
 					return true; 
 				}
-			}
-			else {
+			} else {
 				break
 			}
 		}
@@ -145,8 +135,7 @@ module.exports = {
 				if (winCount == 5) {
 					return true; 
 				}			
-			}
-			else {
+			} else {
 				break
 			}
 		}	
@@ -164,8 +153,7 @@ module.exports = {
 		}
 		if (emptySpaces == 0) {
 			return 'draw';
-		}
-		else {
+		} else {
 			return 'continue';
 		}
 	}
