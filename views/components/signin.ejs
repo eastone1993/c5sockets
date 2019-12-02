@@ -23,9 +23,10 @@
   </div>
 </div>
 
-<script>   
+<script>
+  var hasUsername = <%- JSON.stringify(hasUsername) %>;   
   $(document).ready(function() {
-    if (document.cookie === `username=` || document.cookie === ``) {
+    if (hasUsername == false) {
       $("#myModal").modal({
         backdrop: 'static',
         keyboard: false,

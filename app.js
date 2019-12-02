@@ -58,32 +58,34 @@ setup.buildRooms(roomObj);
 /* GET home page. */
 
 app.get('/', function(req, res) {
+    var hasUsername; 
     if (req.cookies['username']) {
         if (userArray.includes(req.cookies['username']) === false) {
             userArray.push(req.cookies['username']);
-            console.log(userArray);
-        } else {
-            console.log('derp number 1');
-        }
+        } 
+        hasUsername = true;
     } else {
-        console.log('derp number 2');
+        hasUsername = false;
     }
     res.render('index', {
         title: 'Connect 5', 
-        roomObj: roomObj
+        roomObj: roomObj,
+        hasUsername: hasUsername
     });
 });
 
 app.post('/user', function(req, res) {
-    console.log('Username: ' + req.body.username);
-    if (userArray.includes(req.body.username)) {
+    var username = req.body.username;
+    console.log('Username: ' + username);
+    if (userArray.includes(username)) {
         res.send("taken"); 
     } else {
-        res.cookie("username", req.body.username);
+        userArray.push(username); 
+        res.cookie("username", username);
         console.log(req.cookies);
         res.send("cookie updated");
     }
-
+    console.log(userArray);
 }); 
 
 // app.get('/checkuser', function(req, res) {
@@ -122,16 +124,6 @@ app.get('/room', function(req, res) {
     }     
 });
  
-
-// app.post('/reset', function(req, res) {
-//     console.log('resetting game');
-//     roomObj[req.body.location].turn = 'X'; 
-//     roomObj[req.body.location].boardArray = setup.generateBoard(); 
-//     roomObj[req.body.location].gameStatus = 'new';
-//     res.send('game reset');  
-// });
-
-
 io.on('connection', function(socket) { //code for the socket io connection 
 
     //code that runs on initial connection
@@ -241,7 +233,6 @@ io.on('connection', function(socket) { //code for the socket io connection
     });
 
     socket.on('reset', function(res) {
-        //socket.join('1002');
         var location = Object.keys(io.sockets.adapter.sids[socket.id])[0];
         setup.resetRoom(roomObj[location]);
         console.log(roomObj[location]); 

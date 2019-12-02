@@ -15,10 +15,9 @@
 <script>
 	
 	var socket = io(); 
-	
-	var roomLocation = document.getElementById('roomTitle').innerHTML.split(' '); 
-	var username = document.getElementById('username').innerHTML; 
-	socket.emit('join', {location: roomLocation[1], username: username});
+	var roomLocation = <%- JSON.stringify(roomLocation) %>;
+	var username = <%- JSON.stringify(username) %>;
+	socket.emit('join', {location: roomLocation, username: username});
 
 	function clickBlock(event) {
 		var x = event.clientX, y = event.clientY;
@@ -65,13 +64,5 @@
 	
 	function reset(event) {
 		socket.emit('reset'); 
-		
-		/*
-		axios.post('/reset', {location: roomLocation[1]})
-		.then(function(res) {
-			location.reload(); 
-			console.log(res); 
-		});
-		*/
 	}
 </script>
