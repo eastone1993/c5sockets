@@ -171,7 +171,8 @@ io.on('connection', function(socket) { //code for the socket io connection
     socket.on('disconnecting', function() { //whenever a player disconnects
         
         var location = Object.keys(io.sockets.adapter.sids[socket.id])[0];
-        var playerPiece = roomObj[location].players[socket.id]
+        var playerPiece = roomObj[location].players[socket.id];
+        
         socket.on('disconnect', function() {
             setTimeout(function() {
                 if (roomObj[location].players[playerPiece].id == '') {

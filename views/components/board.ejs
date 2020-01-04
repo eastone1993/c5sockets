@@ -10,7 +10,7 @@
 	<%}%>
 </table>	
 <p id="turnCounter">Player Turn: <%= turn%></p>
-<button onclick="reset(event)">RESET</button>
+<!-- <button onclick="reset(event)">RESET</button> -->
 
 <script>
 	
@@ -43,9 +43,8 @@
 		console.log(res);
 		document.getElementById(res.lastMove).innerHTML = res.gameObj.turn;
 		setTimeout(function() {
-			alert(`Game is a Draw!`); 			
+			alert(`Game is a Draw!`);
 		},10);
-
 	});
 
 	socket.on('win', function(res) {
@@ -60,7 +59,6 @@
 	socket.on('reset', function() {
 		location.reload(); 
 	}); 
-	
 	
 	function reset(event) {
 		socket.emit('reset'); 
